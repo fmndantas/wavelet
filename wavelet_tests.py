@@ -6,11 +6,12 @@ from wavelet import Wavelet
 
 
 class OtherTests(unittest.TestCase):
-    def test_allocate_matrix(self):
-        self.assertEqual(self.w.A, None)
-        ans = np.zeros((self.w.m, self.w.mg))
-        self.w._allocate_a_matrix()
-        self.assertTrue(np.array_equal(ans, self.w.A))
+    def test_vstack(self):
+        arr1 = np.array([0, 1])
+        arr2 = np.array([2, 3])
+        ret = np.vstack((arr1, arr2))
+        ans = np.array([[0, 1], [2, 3]])
+        self.assertTrue(np.array_equal(ret, ans))
 
 
 class WaveletShortTests(unittest.TestCase):
@@ -22,17 +23,16 @@ class WaveletShortTests(unittest.TestCase):
     def test_mg(self):
         self.assertEqual(self.w.mg, 2)
 
-    def test_vstack(self):
-        arr1 = np.array([0, 1])
-        arr2 = np.array([2, 3])
-        ret = np.vstack((arr1, arr2))
-        ans = np.array([[0, 1], [2, 3]])
-        self.assertTrue(np.array_equal(ret, ans))
-
     def test_get_raw_4_lines(self):
         l0, l1 = list(self.w._get_raw_lines(self.file))
         self.assertTrue(np.array_equal(l0, np.array([-1, 10])))
         self.assertTrue(np.array_equal(l1, np.array([111, -1.9])))
+
+    def test_allocate_matrix(self):
+        self.assertEqual(self.w.A, None)
+        ans = np.zeros((self.w.m, self.w.mg))
+        self.w._allocate_a_matrix()
+        self.assertTrue(np.array_equal(ans, self.w.A))
 
     def test_set_a_coefficients(self):
         self.w = Wavelet(m=2, g=1)
