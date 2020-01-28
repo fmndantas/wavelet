@@ -35,19 +35,35 @@ class Wavelet:
         if self.mcw is None:
             self.mcw = np.zeros((self.m, message_length + self.mg - self.m))
 
+    def _displace_mcw(self, pad):
+        self.mcw = np.roll(self.mcw, pad)
+
+    def _get_encoded_model(self):
+        return np.zeros((self.mcw.shape[1],))
+
     def mcw_from_coefficients(self, file, message_length):
         self._set_a_coefficients(file)
         self._allocate_mcw(message_length)
         self.mcw[:self.m, :self.mg] = self.A
 
-    def displace_mcw(self, pad):
-        self.mcw = np.roll(self.mcw, self.m * pad)
-
-    def get_encoded_output(self):
-        return np.zeros((self.mcw.shape[1]))
-
     def encode(self, message):
-        pass
+        encoded = self._get_encoded_model()
+        mcw = np.copy(self.mcw)
+        for i in range(0, np.size(message), self.m):
+            encoded += np.matmul(message[i: i + self.m], mcw)
+            mcw = np.roll(mcw, self.m)
+        return encoded
 
+    def _get_decoded_model(self):
+        if self.mcw is None:
+            raise ValueError("MCW is not known")
+        return np.zeros((self.mcw.shape[1] - self.mg + self.m,))
 
-
+    def decode(self, encoded):
+        decoded = self._get_decoded_model()
+        mcw = np.copy(self.mcw)
+        for i in range(np.size(decoded)):
+            if i and i % self.m == 0:
+                mcw = np.roll(mcw, self.m)
+            decoded[i] = np.dot(mcw[i % self.m], encoded)
+        return decoded
