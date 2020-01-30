@@ -35,10 +35,12 @@ class Wavelet:
         if self.mcw is None:
             self.mcw = np.zeros((self.m, message_length + self.mg - self.m))
 
-    def _displace_mcw(self, pad):
-        self.mcw = np.roll(self.mcw, pad)
+    def check_mcw_existence(self):
+        if self.mcw is None:
+            raise ValueError("MCW is not known")
 
     def _get_encoded_model(self):
+        self.check_mcw_existence()
         return np.zeros((self.mcw.shape[1],))
 
     def mcw_from_coefficients(self, file, message_length):
@@ -55,8 +57,7 @@ class Wavelet:
         return encoded
 
     def _get_decoded_model(self):
-        if self.mcw is None:
-            raise ValueError("MCW is not known")
+        self.check_mcw_existence()
         return np.zeros((self.mcw.shape[1] - self.mg + self.m,))
 
     def decode(self, encoded):
